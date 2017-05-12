@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Configuration:
+<?xml version='1.0'?>
+<STEP-ProductInformation ResolveInlineRefs="true" Validation="XSD" ExportDeletedData="true" ExportDerivedAttrs="true">
+    
+    <DeleteProducts/>
+    <DeleteAssets/>
+    
+    <Assets ExportSize="Minimum"/>
+    
+    <Products ExportSize="Selected">
+        <FilterUserType ID="SUBSIDIARY_PRODUCT"/>
+        <Product>
+            <Name/>
+            <AttributeLink/>
+            <ClassificationReference IncludeInherited="true"/>
+            <ProductCrossReference/>
+            <AssetCrossReference/>
+            <EntityCrossReference/>
+            <Values IncludeInherited="true"/>
+            <CustomValues/>
+            <OverrideSubProduct/>
+            <DeleteClassificationReference/>
+            <DeleteAttributeLink/>
+        </Product>
+    </Products>
+
+</STEP-ProductInformation>
+Export from Primary Product Hierarchy
+Classifications All
+Products All
+Assets All
+Collections "Col_GenIF_2.0_NL_nl_Main"
+-->
+<STEP-ProductInformation xmlns="http://www.stibosystems.com/step" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.stibosystems.com/step PIM.xsd" ExportTime="2016-04-10 06:49:02" ExportContext="NL_nl_global" ContextID="NL_nl_global" WorkspaceID="Main" UseContextLocale="false">
+
+  <Assets>
+    <Asset ID="ASSET_MAM_3142067" UserTypeID="MAM_ASSET" Selected="false" Referenced="true">
+      <Name>L_CoastToCoast_4c.ai</Name>
+      <ClassificationReference ClassificationID="ASSET_MANU_SUB_Global_C"/>
+
+      <Values>
+        <Value AttributeID="ATTR_ASSET_AssetType" ID="3">Manufacturer image</Value>
+        <Value AttributeID="ATTR_ASSET_URIcalc">http://172.26.154.24/asset/pixelboxx-mss-62266371/8</Value>
+        <Value AttributeID="ATTR_ASSET_RatingCalc" ID="1">sehr gut (print) (1) / very good (print) (1)</Value>
+        <Value AttributeID="ATTR_ASSET_URI">http://172.26.154.24/asset/pixelboxx-mss-62266371/</Value>
+        <Value AttributeID="ATTR_ASSET_RATING">1</Value>
+        <Value AttributeID="ATTR_ASSET_GENERATION">5</Value>
+        <Value AttributeID="ATTR_ASSET_FineVariant">8</Value>
+        <Value AttributeID="ATTR_ASSET_ProgressIndicator" ID="1">Up to date</Value>
+        <Value AttributeID="ATTR_ASSET_DOI">pixelboxx-mss-62266371</Value>
+        <Value AttributeID="ATTR_ASSET_AssetStatus" ID="3">InternalWorkInProgress</Value>
+        <Value AttributeID="ATTR_ASSET_ContentType" ID="image/png">PNG (Portable Network Graphics)</Value>
+        <Value AttributeID="ATTR_ASSET_Filename">L_CoastToCoast_4c.ai</Value>
+		<iwantotherimage AssetID="ASSET_MAM_3210551"></iwantotherimage>
+      </Values>
+    </Asset>
+    <Asset ID="ASSET_MAM_3210551" UserTypeID="MAM_ASSET" Selected="false" Referenced="true">
+      <Name>L_Just_Entertainment_4c.eps</Name>
+        <ClassificationReference ClassificationID="ASSET_MANU_SUB_Global_J"/>
+
+      <Values>
+        <Value AttributeID="ATTR_ASSET_AssetType" ID="3">Manufacturer image</Value>
+        <Value AttributeID="ATTR_ASSET_URIcalc">http://172.26.154.24/asset/pixelboxx-mss-62267485/8</Value>
+        <Value AttributeID="ATTR_ASSET_RatingCalc" ID="2">gut (print) (2) / good (print) (2)</Value>
+        <Value AttributeID="ATTR_ASSET_URI">http://172.26.154.24/asset/pixelboxx-mss-62267485/</Value>
+        <Value AttributeID="ATTR_ASSET_RATING">2</Value>
+        <Value AttributeID="ATTR_ASSET_GENERATION">5</Value>
+        <Value AttributeID="ATTR_ASSET_FineVariant">8</Value>
+        <Value AttributeID="ATTR_ASSET_ProgressIndicator" ID="1">Up to date</Value>
+        <Value AttributeID="ATTR_ASSET_DOI">pixelboxx-mss-62267485</Value>
+        <Value AttributeID="ATTR_ASSET_AssetStatus" ID="3">InternalWorkInProgress</Value>
+        <Value AttributeID="ATTR_ASSET_ContentType" ID="image/png">PNG (Portable Network Graphics)</Value>
+        <Value AttributeID="ATTR_ASSET_Filename">L_Just_Entertainment_4c.eps</Value>
+		<iwantotherimage AssetID="3rddimension"></iwantotherimage>
+      </Values>
+    </Asset>
+	<Asset ID="3rddimension" UserTypeID="MAM_ASSET" Selected="false" Referenced="true">
+      <Name>L_Just_Entertainment_4c.eps</Name>
+        <ClassificationReference ClassificationID="ASSET_MANU_SUB_Global_J"/>
+
+      <Values>
+        <Value AttributeID="ATTR_ASSET_AssetType" ID="3">Manufacturer image</Value>
+        <Value AttributeID="ATTR_ASSET_URIcalc">http://172.26.154.24/asset/pixelboxx-mss-62267485/8</Value>
+        <Value AttributeID="ATTR_ASSET_RatingCalc" ID="2">gut (print) (2) / good (print) (2)</Value>
+        <Value AttributeID="ATTR_ASSET_URI">http://172.26.154.24/asset/pixelboxx-mss-62267485/</Value>
+        <Value AttributeID="ATTR_ASSET_RATING">2</Value>
+        <Value AttributeID="ATTR_ASSET_GENERATION">5</Value>
+        <Value AttributeID="ATTR_ASSET_FineVariant">8</Value>
+        <Value AttributeID="ATTR_ASSET_ProgressIndicator" ID="1">Up to date</Value>
+        <Value AttributeID="ATTR_ASSET_DOI">pixelboxx-mss-62267485</Value>
+        <Value AttributeID="ATTR_ASSET_AssetStatus" ID="3">InternalWorkInProgress</Value>
+        <Value AttributeID="ATTR_ASSET_ContentType" ID="image/png">PNG (Portable Network Graphics)</Value>
+        <Value AttributeID="ATTR_ASSET_Filename">L_Just_Entertainment_4c.eps</Value>
+      </Values>
+    </Asset>
+  </Assets>
+</STEP-ProductInformation>
