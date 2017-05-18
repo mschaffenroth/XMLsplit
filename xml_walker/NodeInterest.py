@@ -1,3 +1,6 @@
+from xml_walker.XMLNode import AutoMergeInterestNode
+
+
 class Interest:
     def __init__(self, interest, callback, event='start'):
         self.interest = interest

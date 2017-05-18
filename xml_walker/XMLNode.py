@@ -1,15 +1,18 @@
-def nice_start_tag(element):
-    ret = [element.tag.replace("{%s}" % element.nsmap[ns], "%s:" % ns) if ns else element.tag.replace(
-        "{%s}" % element.nsmap[ns], '') for ns in element.nsmap if element.nsmap[ns] in element.tag]
-    nice_tag = "<%s%s>" % (ret[0] if ret else element.tag, " ".join(["%s=\"%s\"" %  (x,y) for x,y in element.attrib]) if element.attrib else "")
-    return nice_tag
+from anytree import Node
 
-def nice_end_tag(element):
-    #ret = [element.tag.replace("{%s}" % element.nsmap[ns], "%s:" % ns) if ns else element.tag.replace(
-    #    "{%s}" % element.nsmap[ns], '') for ns in element.nsmap if element.nsmap[ns] in element.tag]
-    ret = [element.tag.split("}")[-1]]
-    nice_tag = "</%s>" % ret[0] if ret else element.tag
-    return nice_tag
+class XMLHelper:
+    def nice_start_tag(element):
+        ret = [element.tag.replace("{%s}" % element.nsmap[ns], "%s:" % ns) if ns else element.tag.replace(
+            "{%s}" % element.nsmap[ns], '') for ns in element.nsmap if element.nsmap[ns] in element.tag]
+        nice_tag = "<%s%s>" % (ret[0] if ret else element.tag, " ".join(["%s=\"%s\"" %  (x,y) for x,y in element.attrib]) if element.attrib else "")
+        return nice_tag
+
+    def nice_end_tag(element):
+        #ret = [element.tag.replace("{%s}" % element.nsmap[ns], "%s:" % ns) if ns else element.tag.replace(
+        #    "{%s}" % element.nsmap[ns], '') for ns in element.nsmap if element.nsmap[ns] in element.tag]
+        ret = [element.tag.split("}")[-1]]
+        nice_tag = "</%s>" % ret[0] if ret else element.tag
+        return nice_tag
 
 
 # provide all the informations to write the element into a file
@@ -25,7 +28,7 @@ class XMLNode:
         self.tail = element.tail
 
 
-class AutoMergeInterestNode(XMLNode):
+class AutoMergeInterestNode(Node):
     # FExt
     def _pre_detach(self, parent):
         if not self in self.garbage:

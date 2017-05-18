@@ -1,5 +1,10 @@
+from collections import defaultdict
+from lxml import etree
+
+
 class FastXMLCallbackWalker:
     def __init__(self):
+        from xml_walker.NodeInterest import InterestPathTree
         self._absolute_interest_tree = InterestPathTree()  # self.vr(None)
         self._relative_interests_trees = {}  # AutoMergeNode("RelativeInterestTreeRoot")
         self.current_absolute_node_chain_depth = 0

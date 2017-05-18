@@ -1,7 +1,17 @@
+from collections import namedtuple
+
+from xml_walker.FileSupport import Files
+from xml_walker.NodeInterest import Interest
+from xml_walker.XMLNode import XMLHelper
+from xml_walker.XMLWalker import FastXMLCallbackWalker
+
 class XMLWriter(FastXMLCallbackWalker):
+
+    delayed_element = namedtuple("delayed_element", ["files", "element", "part"])
     def __init__(self):
         self.xpath2files = {}
         self.delay_element_parts = []
+        from collections import defaultdict
         self.node_written = defaultdict(set)
         self.node_start_counter = 0
         self.node_stack = []
@@ -89,9 +99,10 @@ class XMLWriter(FastXMLCallbackWalker):
 
     def split(self, file):
         #f = open(, "w")
-        f = "1.xml"
-        self.xpath2files["/*[0]/*[0]/*[0]/*[0]"] = set([f])
-        self.xpath2files["/*[0]/*[0]/*[0]/*[1]"] = set([f])
+        f1 = "../out/1.xml"
+        f2 = "../out/2.xml"
+        self.xpath2files["/*[0]/*[0]/*[0]/*[0]"] = set([f1])
+        self.xpath2files["/*[0]/*[0]/*[0]/*[1]"] = set([f2])
         self.register_write_nodes([x for x in self.xpath2files])
         self.walk_tree(file_path=file)
         self.post_actions()
@@ -100,11 +111,11 @@ class XMLWriter(FastXMLCallbackWalker):
         for delay_element_part in self.delay_element_parts:
             if delay_element_part.part == "start_tag":
                 for file in delay_element_part.files:
-                    self.files[file].write(Helper.nice_start_tag(delay_element_part.element))
+                    self.files[file].write(XMLHelper.nice_start_tag(delay_element_part.element))
 
             if delay_element_part.part == "end_tag":
                 for file in delay_element_part.files:
-                    self.files[file].write(Helper.nice_end_tag(delay_element_part.element))
+                    self.files[file].write(XMLHelper.nice_end_tag(delay_element_part.element))
 
             if delay_element_part.part == "text":
                 for file in delay_element_part.files:
@@ -118,13 +129,13 @@ class XMLWriter(FastXMLCallbackWalker):
         self.delay_element_parts = []
 
     def write_start_tag(self, files, element):
-        self.delay_element_parts.append(delayed_element(files=files, element=element, part="start_tag"))
+        self.delay_element_parts.append(self.delayed_element(files=files, element=element, part="start_tag"))
 
     def write_end_tag(self, files, element):
-        self.delay_element_parts.append(delayed_element(files=files, element=element, part="end_tag"))
+        self.delay_element_parts.append(self.delayed_element(files=files, element=element, part="end_tag"))
 
     def write_text(self, files, element):
-        self.delay_element_parts.append(delayed_element(files=files, element=element, part="text"))
+        self.delay_element_parts.append(self.delayed_element(files=files, element=element, part="text"))
 
     def write_tail(self, files, element):
-        self.delay_element_parts.append(delayed_element(files=files, element=element, part="tail"))
+        self.delay_element_parts.append(self.delayed_element(files=files, element=element, part="tail"))
