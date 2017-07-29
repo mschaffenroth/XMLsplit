@@ -1,4 +1,10 @@
-from xml_splitter.xmlsplit_revised import Interest
+from collections import defaultdict
+
+from anytree import RenderTree
+
+from xml_walker.Logger import Logger
+from xml_walker.NodeInterest import Interest
+from xml_walker.XMLWalker import FastXMLCallbackWalker
 
 
 class StepXMLsplitter:
@@ -6,6 +12,7 @@ class StepXMLsplitter:
         self.IDs = set()
         self.SplitNodes = defaultdict(list)
         self.Refs = defaultdict(set)
+        self.IDs2Exact = defaultdict(set)
 
     def check_for_references(self, **kwargs):
         element = kwargs["element"]
@@ -29,7 +36,10 @@ class StepXMLsplitter:
                         Logger.info("%s Refs" % len(self.Refs))
 
     def add_split_node(self, **kwargs):
-        self.SplitNodes[kwargs['interest'].interest].append(kwargs["element"].attrib["ID"])
+        ID = kwargs["element"].attrib["ID"]
+        self.SplitNodes[kwargs['interest'].interest].append(ID)
+        walker = kwargs["walker"]
+        self.IDs2Exact[ID].add(walker.exact_path)
         if sum([len(self.SplitNodes[x]) for x in self.SplitNodes]) % 10000 == 0:
             Logger.info("%s SplitNodes" % sum([len(self.SplitNodes[x]) for x in self.SplitNodes]))
 
@@ -41,9 +51,9 @@ class StepXMLsplitter:
                 Logger.info("%s IDs" % len(self.IDs))
 
     def calc_connected_sets(self, refs, split_nodes):
-        return [refs[x] + [x] if x in refs else [x] for y in split_nodes for x in y]
+        return [refs[x] | set([x]) if x in refs else [x] for y in split_nodes for x in split_nodes[y]]
 
-    def search_stepxml(self):
+    def search_stepxml(self, myfile):
         # root=None
         fx = FastXMLCallbackWalker()
 
@@ -58,12 +68,12 @@ class StepXMLsplitter:
         )
         # for _uuid in fx.relative_interests_trees:
         #    print(RenderTree(fx.relative_interests_trees[_uuid]))
-        fx.walk_tree("big/example.xml")
+        fx.walk_tree(myfile)
         Logger.debug("IDs: %s" % self.IDs)
         Logger.debug("split_nodes: %s" %self.SplitNodes)
         fx2 = FastXMLCallbackWalker()
         fx2.register_event_callback("start", self.check_for_references)
-        fx2.walk_tree("big/example.xml")
+        fx2.walk_tree(myfile)
 
         Logger.debug("direct: %s" % self.Refs)
 
@@ -73,7 +83,14 @@ class StepXMLsplitter:
 
         connected_sets = self.calc_connected_sets(self.Refs, self.SplitNodes)
         Logger.debug("conected_sets: %s" % connected_sets)
-
+        connected_sets2 = []
+        for connected_set in connected_sets:
+            my_set = set()
+            for item in connected_set:
+                for exactpath in self.IDs2Exact[item]:
+                    my_set.add(exactpath)
+            connected_sets2.append(my_set)
+        return connected_sets2
 
 class GenIF2Splitter:
     def __init__(self):
@@ -123,6 +140,7 @@ class GenIF2Splitter:
 
     def add_split_node_id(self, **kwargs):
         found_id = kwargs["element"].text
+        self.add_id(**kwargs)
         self.ExactPathIDs2SplitNodes[kwargs["walker"].exact_path.rsplit("/", 1)[0]].append(found_id)
         if found_id not in self.IDs:
             self.IDs.add(found_id)
@@ -139,12 +157,13 @@ class GenIF2Splitter:
 
     # calculates all the ids that need to be in one file
     def calc_connected_sets(self, refs, split_nodes):
-        return {split_path: [set([exact for id_ in items[1] for ref in self.Refs[id_]|set([id_]) for exact in self.IDs2ExactPaths[ref]]) for items in split_nodes[split_path]] for split_path in split_nodes}
+        res = {split_path: [set([exact for id_ in items[1] for ref in self.Refs[id_]|set([id_]) for exact in self.IDs2ExactPaths[ref]]) for items in split_nodes[split_path]] for split_path in split_nodes}
+        return res
 
     def convert2exactpaths(self, listofids):
         return [exact for id in listofids for exact in self.IDs2ExactPaths[id]]
 
-    def search_genif2(self):
+    def search_genif2(self, genif_file):
         # root=None
         fx = FastXMLCallbackWalker()
 
@@ -187,58 +206,75 @@ class GenIF2Splitter:
         # print(RenderTree(fx.absolute_interest_tree.interest_tree))
         for _uuid in fx._relative_interests_trees:
             print(RenderTree(fx._relative_interests_trees[_uuid].interest_tree))
-        fx.walk_tree("genif2.xml")
-        print("ids: %s" % self.IDs)
-        print("split_nodes: %s" % self.SplitNodes)
+        fx.walk_tree(genif_file)
+        Logger.debug("ids: %s" % self.IDs)
+        Logger.debug("split_nodes: %s" % self.SplitNodes)
         # print("relations: %s" % fx.relations)
 
-        print("IDsSplitNodes %s" % self.ExactPathIDs2SplitNodes)
-        print("direct: %s" % self.Refs)
+        Logger.debug("IDsSplitNodes %s" % self.ExactPathIDs2SplitNodes)
+        Logger.debug("direct: %s" % self.Refs)
         self.calc_splitnode_ids()
 
         idr = IndirectIDResovler(self.Refs, self.SplitNodes)
         idr.resolve_indirect()
-        print("indirect: %s" % idr.refs)
+        Logger.debug("indirect: %s" % idr.refs)
 
         connected_sets = self.calc_connected_sets(self.Refs, self.SplitNodes)
 
-        print("conected_sets: %s" % connected_sets)
+        Logger.debug("connected_sets: %s" % connected_sets)
 
         nd=NodeDistributor(connected_sets)
-        distribution_to_files =  nd.distribute()
+        distribution_to_files = nd.distribute()
 
-        print("distribution to files: %s" % distribution_to_files)
-        fx2 = FastXMLCallbackWalker()
-        fx2.register_interests([NodeDistributionInterest(interest, target_file="output_%s" % i, callback=lambda **kwargs: print("i am at node %s and want to write to file %s" % (XMLNode(kwargs["element"], [kwargs["interest"].target_file]).start_tag, kwargs["interest"].target_file))) for i, file_ in enumerate(distribution_to_files) for interests in file_ for interest in interests])
-        fx2.walk_tree("genif2.xml")
+        Logger.debug("distribution to files: %s" % distribution_to_files)
+
+        return distribution_to_files
+        #fx2 = FastXMLCallbackWalker()
+        #fx2.register_interests(
+        #    [
+        #        NodeDistributionInterest(interest, target_file="output_%s" % i, callback=
+        #            lambda **kwargs: print("i am at node %s and want to write to file %s" % (
+        #                XMLNode(kwargs["element"], [kwargs["interest"].target_file]).start_tag, kwargs["interest"].target_file)
+        #                              )
+        #        )
+        #        for i, file_ in enumerate(distribution_to_files) for interests in file_ for interest in interests
+        #    ]
+        #)
+        #fx2.walk_tree(genif_file)
 
 
 class NodeDistributor:
+    """
+    connected_sets_by_split_path: dictionary with split paths as key and a list of connected sets that belong to the 
+    split path as value
+    """
     def __init__(self, connected_sets_by_split_path):
         self.connected_sets_by_split_path = connected_sets_by_split_path
 
+    # distribute nodes that are selected by a split path into bags. Every bag has a node restriction which is the
+    # maximum number of nodes allowed in a bag. The bag filling level is a number between 0 and 1 where 1 is a full bag
     def distribute(self):
         bags=[]
-        # bagsize = 1 --> node_restriction / nodes_to_add <= 1
+        # bag_filling_level = 1 --> node_restriction / nodes_to_add <= 1
         # node_restriction / nodes_to_add = 1
-        bagsize = 0
+        bag_filling_level = 0
         bag=[]
         while len(self.connected_sets_by_split_path):
             for split_path in self.connected_sets_by_split_path.copy():
                 assert split_path.node_restriction > 0
                 items_to_take_from = self.connected_sets_by_split_path[split_path]
-                take_number_items = min((1-bagsize) * split_path.node_restriction, len(items_to_take_from))
+                take_number_items = min((1-bag_filling_level) * split_path.node_restriction, len(items_to_take_from))
                 if take_number_items:
                     assert take_number_items <= len(items_to_take_from)
                     assert items_to_take_from
                     assert take_number_items <= split_path.node_restriction
-                    bagsize += take_number_items/split_path.node_restriction
-                    assert bagsize <= 1
+                    bag_filling_level += take_number_items/split_path.node_restriction
+                    assert bag_filling_level <= 1
                     assert take_number_items
                     assert int(take_number_items)
                     items_to_add_to_bag = items_to_take_from[:int(take_number_items)]
-                    #items_to_add_to_bag =[",".join([str(split_path).rsplit("}",1)[1]]*int(take_number_items))]
-                    #print("items in the bag %s" % [",".join([str(split_path).rsplit("}",1)[1]]*int(take_number_items))])
+                    # items_to_add_to_bag =[",".join([str(split_path).rsplit("}",1)[1]]*int(take_number_items))]
+                    # print("items in the bag %s" % [",".join([str(split_path).rsplit("}",1)[1]]*int(take_number_items))])
                     # remove items from set
                     self.connected_sets_by_split_path[split_path] = items_to_take_from[int(take_number_items):]
                     if len(self.connected_sets_by_split_path[split_path]) == 0:
@@ -247,7 +283,7 @@ class NodeDistributor:
             assert bag
             bags.append(bag)
             bag=[]
-            bagsize = 0
+            bag_filling_level = 0
         return bags
 
 

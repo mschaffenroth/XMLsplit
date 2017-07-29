@@ -1,5 +1,9 @@
+import uuid
 from collections import defaultdict
 from lxml import etree
+
+from xml_walker.NodeInterest import Interest, InterestPathTree
+from xml_walker.XMLNode import AutoMergeInterestNode
 
 
 class FastXMLCallbackWalker:
@@ -139,7 +143,7 @@ class FastXMLCallbackWalker:
 
         # check relative interests
         for _uuid in walker._relative_interests_trees:
-            walker.relative_interests_trees[_uuid].node_start(element=element, mode="relative",
+            walker._relative_interests_trees[_uuid].node_start(element=element, mode="relative",
                                                               document_depth=walker.current_absolute_node_chain_depth,
                                                               kwargs=kwargs)
         # check exact interests
@@ -158,7 +162,7 @@ class FastXMLCallbackWalker:
 
         # check relative interests
         for _uuid in walker._relative_interests_trees:
-            walker.relative_interests_trees[_uuid].node_end(element=element, mode="relative",
+            walker._relative_interests_trees[_uuid].node_end(element=element, mode="relative",
                                                             document_depth=walker.current_absolute_node_chain_depth,
                                                             kwargs=kwargs)
         # check exact interests

@@ -25,5 +25,6 @@
   <target>
   <uniqueID>ASSET_MAM_257762</uniqueID>
   </target>
-  </relation>  
+  </relation>
+    <item><uniqueID>PROD_DE_1179518</uniqueID></item>
   </data>

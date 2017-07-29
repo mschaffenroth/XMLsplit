@@ -1,13 +1,47 @@
 from anytree import Node
 
 class XMLHelper:
+    written_ns = set()
+    @staticmethod
+    def nice_attrib(attrib, nsmap):
+        """
+
+        :param attrib: lxml element attribute
+        :param nsmap: namespace map of the lxml element
+        :return: (string) attribute with namespace shortcut if namespace used
+        """
+        if "{" in attrib:
+            for ns in nsmap:
+                if nsmap[ns] in attrib:
+                    attrib = attrib.replace("{%s}" % nsmap[ns],"%s:" % ns)
+        return attrib
+    @staticmethod
     def nice_start_tag(element):
+        """
+        Nice start tag calculation
+
+        This method returns a start tag from a given lxml element
+        :param element: lxml element
+        :return: (string) start tag
+        """
         ret = [element.tag.replace("{%s}" % element.nsmap[ns], "%s:" % ns) if ns else element.tag.replace(
             "{%s}" % element.nsmap[ns], '') for ns in element.nsmap if element.nsmap[ns] in element.tag]
-        nice_tag = "<%s%s>" % (ret[0] if ret else element.tag, " ".join(["%s=\"%s\"" %  (x,y) for x,y in element.attrib]) if element.attrib else "")
+        nice_tag = "<%s%s%s>" % (
+            ret[0] if ret else element.tag,
+            " " + " ".join(["%s=\"%s\"" % (XMLHelper.nice_attrib(x, element.nsmap),element.attrib[x]) for x in element.attrib]) if element.attrib else "",
+            " " + " ".join(["xmlns%s=\"%s\"" % (":%s" % x if x else "", element.nsmap[x]) for x in element.nsmap if not x in XMLHelper.written_ns]) if element.nsmap.keys() - XMLHelper.written_ns else ""
+        )
+        XMLHelper.written_ns.update(element.nsmap)
         return nice_tag
-
+    @staticmethod
     def nice_end_tag(element):
+        """
+        Nice end tag calculation
+
+        This method returns a start tag from a given lxml element
+        :param element: lxml element
+        :return: (string) start tag
+        """
         #ret = [element.tag.replace("{%s}" % element.nsmap[ns], "%s:" % ns) if ns else element.tag.replace(
         #    "{%s}" % element.nsmap[ns], '') for ns in element.nsmap if element.nsmap[ns] in element.tag]
         ret = [element.tag.split("}")[-1]]
@@ -18,10 +52,15 @@ class XMLHelper:
 # provide all the informations to write the element into a file
 class XMLNode:
     def __init__(self, element, wanted_in_files):
+        """
+        XML Node class
+        :param element: lxml element
+        :param wanted_in_files: list of files that need this element
+        """
         self.wanted_in_files = wanted_in_files # mark when we want to write it into a file
         self.written_in_files = [] # mark when started to write in file (start tag)
-        self.start_tag = nice_start_tag(element)
-        self.end_tag = nice_end_tag(element)
+        self.start_tag = XMLHelper.nice_start_tag(element)
+        self.end_tag = XMLHelper.nice_end_tag(element)
         self.element = element
 
     def update(self, element):
@@ -29,6 +68,11 @@ class XMLNode:
 
 
 class AutoMergeInterestNode(Node):
+    """
+    This class defines the interest in a node. It is part of a interest chain.
+    An interest can have a parent, which means that this node can only be found if the parent has been found before.
+    This node automatically merges when a duplicate sibling has been found
+    """
     # FExt
     def _pre_detach(self, parent):
         if not self in self.garbage:
