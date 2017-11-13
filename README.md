@@ -106,6 +106,3 @@ outputfile3.xml
         </b>
     </a> 
    
-
-Example:
-
