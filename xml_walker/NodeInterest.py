@@ -13,6 +13,7 @@ class NodeDistributionInterest(Interest):
         super(NodeDistributionInterest, self).__init__(interest, callback, event)
         self.target_file = target_file
 
+
 class InterestPathTree:
     def __init__(self):
         self.current_tree_depth = 0

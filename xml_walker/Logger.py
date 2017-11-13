@@ -10,11 +10,11 @@ class FunctionalLogger:
     def __init__(self):
         # create logger
         self._logger = logging.getLogger('logger')
-        self._logger.setLevel(logging.DEBUG)
+        self._logger.setLevel(logging.INFO)
 
         # create console handler and set level to debug
         self._ch = logging.StreamHandler()
-        self._ch.setLevel(logging.DEBUG)
+        self._ch.setLevel(logging.INFO)
 
         self.log_io = StringIO()
         self.streamhandler = logging.StreamHandler(self.log_io)

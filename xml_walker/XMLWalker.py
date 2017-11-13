@@ -2,6 +2,7 @@ import uuid
 from collections import defaultdict
 from lxml import etree
 
+from xml_walker.Logger import Logger
 from xml_walker.NodeInterest import Interest, InterestPathTree
 from xml_walker.XMLNode import AutoMergeInterestNode
 
@@ -111,7 +112,6 @@ class FastXMLCallbackWalker:
         if event == "end":
             return callback in self.event_callback_end
 
-
     @staticmethod
     def reset_relative_tree(TREEID, **kwargs):
         Logger.debug("Reset relative tree %s" % TREEID)
@@ -175,11 +175,18 @@ class FastXMLCallbackWalker:
         walker.current_absolute_node_chain_depth -= 1
 
     def walk_tree(self, file_path):
+        delayed_clear = []
         for event, element in etree.iterparse(file_path, events=("start", "end")):
             if event == "start":
                 for callback in self.event_callback_start:
                     callback(event=event, element=element, walker=self)
+                for element in delayed_clear:
+                    element.clear()
+                delayed_clear = []
             if event == "end":
                 for callback in self.event_callback_end:
                     callback(event=event, element=element, walker=self)
-                element.clear()
+                for element in delayed_clear:
+                    element.clear()
+                delayed_clear = []
+                delayed_clear.append(element)

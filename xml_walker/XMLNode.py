@@ -1,5 +1,8 @@
 from anytree import Node
 
+from xml_walker.Logger import Logger
+
+
 class XMLHelper:
     written_ns = set()
     @staticmethod
@@ -77,10 +80,10 @@ class AutoMergeInterestNode(Node):
     def _pre_detach(self, parent):
         if not self in self.garbage:
             del parent.children_names[self.name]
-        print("_pre_detach", parent)
+        Logger.debug("_pre_detach %s" % parent)
 
         # def _post_detach(self, parent):
-        # print("_post_detach", parent)
+        # Logger.debug("_post_detach", parent)
 
     garbage = set()
 
@@ -136,7 +139,7 @@ class AutoMergeInterestNode(Node):
                 #
                 # self.parent = None
 
-                # print("_pre_attach", parent)
+                # Logger.debug("_pre_attach", parent)
 
                 # def _post_attach(self, parent):
-                # print("_post_attach", parent)
+                # Logger.debug("_post_attach", parent)

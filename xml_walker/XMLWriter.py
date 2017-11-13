@@ -9,6 +9,7 @@ from xml_walker.XMLWalker import FastXMLCallbackWalker
 class XMLWriter(FastXMLCallbackWalker):
 
     delayed_element = namedtuple("delayed_element", ["files", "element", "part"])
+
     def __init__(self):
         self.path_to_files = {}
         self.delay_element_parts = []
@@ -23,27 +24,27 @@ class XMLWriter(FastXMLCallbackWalker):
         if not self.has_event_callback('end', self._node_end):
             self.register_event_callback('end', self._node_end)
 
-    def _node_start(self, **kwargs):
+    def _node_start(self, walker, element, **kwargs):
         # write tags or content (writing is delayed so that we do not try to write anything that has not been parsed yet!)
         self.write_delayed_element_parts()
-        exact_path = kwargs['walker'].exact_path
-        element = kwargs['element']
+        exact_path = walker.exact_path
+        parent_xpath = exact_path.rsplit("/", 1)[0]
+        element = element
         Logger.debug("write_node_start: element %s" % element)
 
         self.node_stack.append(element)
 
         Logger.debug("write_node_start node_stack: %s" % self.node_stack)
         element_wanted_in_files = set()
-        # for i in range(len(self.node_stack)):
-        #    exact_path = exact_path.rsplit("/", 1)[0]
-        #    if exact_path in self.xpath2files:
-        #        element_wanted_in_files |= self.xpath2files[exact_path]
-        parent_xpath = exact_path.rsplit("/", 1)[0]
-        element_wanted_in_files = (self.path_to_files[exact_path] if exact_path in self.path_to_files else set()) | \
-                                  (self.path_to_files[parent_xpath] if parent_xpath in self.path_to_files else set())
+        #for i in range(len(self.node_stack)):
+        for i in range(self.exact_path.count('/')):
+            if exact_path in self.path_to_files:
+                element_wanted_in_files |= self.path_to_files[exact_path]
+            exact_path = exact_path.rsplit("/", 1)[0]
+
         self.path_to_files[parent_xpath] = element_wanted_in_files
         if element_wanted_in_files:
-             for elem in self.node_stack:
+            for elem in self.node_stack:
                 element_to_files = element_wanted_in_files - \
                                    (self.node_written[elem] if elem in self.node_written else set())
                 if element_to_files:
@@ -51,71 +52,21 @@ class XMLWriter(FastXMLCallbackWalker):
                     self.write_text(element_to_files, elem)
                     self.node_written[elem] |= element_to_files
 
-    def _write_close_nodes_stack(self, stack):
-        for elem in reversed(stack):
-            elem_to_files = self.node_written[elem] if elem in self.node_written else set()
-            if elem_to_files:
-                self.write_end_tag(elem_to_files, elem)
-                self.write_tail(elem_to_files, elem)
-
     def _node_end(self, **kwargs):
         self.write_delayed_element_parts()
         element = kwargs['element']
         exact_path = kwargs['walker'].exact_path
         Logger.debug("write_node_end: element %s" % element)
-        #
-        #for elem in self.node_stack:
-        #    elem_to_files = self.node_written[elem] if elem in self.node_written else set()
-        #    if elem_to_files:
-        #        self.write_end_tag(elem_to_files, elem)
-        #        self.write_tail(elem_to_files, elem)
-        # TODO FIX!
 
         if self.node_written[element]:
             self.write_end_tag(self.node_written[element], element)
             self.write_tail(self.node_written[element], element)
-
 
         self.node_stack.pop()
         if element in self.node_written:
             del self.node_written[element]
         if exact_path in self.path_to_files:
             del self.path_to_files[exact_path]
-
-
-
-    def write_node_start(self, **kwargs):
-        # self.node_start_counter += 1
-        # if self.node_start_counter == 1:
-        #     assert not self.has_event_callback('start', self._write_node_start)
-        #     assert not self.has_event_callback('end', self._write_node_end)
-        #     if not self.has_event_callback('start', self._node_start):
-        #         self.register_event_callback('start', self._node_start)
-        #     if not self.has_event_callback('end', self._node_end):
-        #         self.register_event_callback('end', self._node_end)
-        # if self.node_start_counter > 1:
-        #     assert self.has_event_callback('start', self._write_node_start)
-        #     assert self.has_event_callback('end', self._write_node_end)
-        pass
-
-    def write_node_end(self, **kwargs):
-        pass
-        # self.node_start_counter -= 1
-        # if self.node_start_counter == 0:
-            # self._node_end(**kwargs)
-            # self.remove_event_callback('start', self._write_node_start)
-            # self.remove_event_callback('end', self._write_node_end)
-            # Logger.debug("remove _write_node_end callback")
-            # self._write_close_nodes_stack(self.node_stack)
-            # self.node_stack = []
-
-    #def register_write_nodes(self, xpaths):
-    #    for xpath in xpaths:
-    #        self.register_write_node(xpath)
-
-    # def register_write_node(self, xpath):
-    #     self.register_interest(Interest(xpath, self.write_node_start, event='start'))
-    #     self.register_interest(Interest(xpath, self.write_node_end, event='end'))
 
     def post_actions(self):
         self.write_delayed_element_parts()
@@ -128,7 +79,6 @@ class XMLWriter(FastXMLCallbackWalker):
         :param paths_to_files: list of paths that select a part of the original document and the filenumbers where they will be saved 
         :return: list of paths to splitted files
         '''
-        #f = open(, "w")
         self.path_to_files = paths_to_files
         # assert that input is a list of file numbers
         for path in paths_to_files:
@@ -144,6 +94,7 @@ class XMLWriter(FastXMLCallbackWalker):
         self.walk_tree(file_path=source_file)
         self.post_actions()
         self.close()
+        Logger.info("splitting %s completed" % source_file)
         return self.path_to_files
 
     def write_delayed_element_parts(self):

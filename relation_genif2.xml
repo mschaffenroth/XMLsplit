@@ -1,30 +1,39 @@
-  <data xmlns="http://www.media-saturn.com/msx" xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<data xmlns="http://www.media-saturn.com/msx" xmlns:vc="http://www.w3.org/2007/XMLSchema-versioning" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <relation>
-  <source>
-  <uniqueID>PROD_DE_1483047</uniqueID>
+    <source>
+      <uniqueID>PROD_DE_1483047</uniqueID>
+      <uniqueID>EAN123</uniqueID>
+    </source>
+    <target>
+      <uniqueID>pixelboxx-mss-59899665</uniqueID>
+      <uniqueID>BILD123</uniqueID>
+    </target>
+  </relation>
+  <relation>
+    <source>
+      <uniqueID>MPG_DE_125</uniqueID>
+    </source>
+    <target>
+      <uniqueID>ASSET_MAM_250613</uniqueID>
+    </target>
+  </relation>
+  <relation>
+    <source>
+      <uniqueID>PROD_DE_1179518</uniqueID>
+      <uniqueID>MPG_DE_121</uniqueID>
+    </source>
+    <target>
+      <uniqueID>ASSET_MAM_257762</uniqueID>
+    </target>
+  </relation>
+  <item>
+    <uniqueID>PROD_DE_1179518</uniqueID>
+  </item>
+  <item>
+    <uniqueID>PROD_DE_1483047</uniqueID>
     <uniqueID>EAN123</uniqueID>
-  </source>
-  <target>
-  <uniqueID>pixelboxx-mss-59899665</uniqueID>
-    <uniqueID>BILD123</uniqueID>
-  </target>
-  </relation>
-  <relation>
-  <source>
-  <uniqueID>MPG_DE_125</uniqueID>
-  </source>
-  <target>
-  <uniqueID>ASSET_MAM_250613</uniqueID>
-  </target>
-  </relation>
-  <relation>
-  <source>
-  <uniqueID>PROD_DE_1179518</uniqueID>
-  <uniqueID>MPG_DE_121</uniqueID>
-  </source>
-  <target>
-  <uniqueID>ASSET_MAM_257762</uniqueID>
-  </target>
-  </relation>
-    <item><uniqueID>PROD_DE_1179518</uniqueID></item>
-  </data>
+  </item>
+  <asset>
+    <uniqueID>pixelboxx-mss-59899665</uniqueID>
+  </asset>
+</data>
